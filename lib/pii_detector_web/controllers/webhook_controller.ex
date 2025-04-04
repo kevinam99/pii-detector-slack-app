@@ -4,9 +4,6 @@ defmodule PiiDetectorWeb.WebhookController do
   require Logger
 
   @slack_app_id Application.compile_env!(:pii_detector, :slack)[:app_id]
-  @slack_client_id Application.compile_env!(:pii_detector, :slack)[:client_id]
-  @slack_secret Application.compile_env!(:pii_detector, :slack)[:secret]
-  @slack_signing_secret Application.compile_env!(:pii_detector, :slack)[:signing_secret]
   @slack_verification_token Application.compile_env!(:pii_detector, :slack)[:verification_token]
 
   def slack_webhook(conn, %{"challenge" => challenge}) do
@@ -41,6 +38,19 @@ defmodule PiiDetectorWeb.WebhookController do
     end
   end
 
+  def notion_webhook(conn, %{"verification_token" => token}) do
+    IO.inspect(token, label: "Notion Webhook Token")
+    json(conn, %{challenge: "challenge"})
+  end
+
+  def notion_webhook(conn, %{"type" => "page.created"} = params) do
+    # Handle the Notion webhook event here
+    IO.inspect(params, label: "Notion Webhook Event")
+
+    with 
+    json(conn, %{})
+  end
+
   defp handle_text_message(nil, _event) do
     # Handle the case where there is no text message
     nil
@@ -50,7 +60,7 @@ defmodule PiiDetectorWeb.WebhookController do
     text_message = String.trim(text_message)
 
     with {:ok, response} <- PiiDetector.Cloudlare.check_pii_with_ai(text_message) do
-      PiiDetector.Slack.call_slack(response, event)
+      PiiDetector.Slack.send_message(response, event)
     else
       {:error, reason} ->
         # Handle the error case
