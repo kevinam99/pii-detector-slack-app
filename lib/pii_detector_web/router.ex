@@ -9,6 +9,7 @@ defmodule PiiDetectorWeb.Router do
     pipe_through :api
 
     post "/slack-webhook", WebhookController, :slack_webhook
+    post "/notion-webhook", WebhookController, :notion_webhook
   end
 
   # Enable LiveDashboard in development

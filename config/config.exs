@@ -43,6 +43,12 @@ config :pii_detector, :cloudflare,
   api_token: "2GM5GrK_Dpiz7GCELmP6x3tqgpUn03NyCDyt-B-6",
   account_id: "2532c238321714c590816151bbbb15e5"
 
+# notion config
+
+config :pii_detector, :notion,
+  api_token: "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",
+  database_id: "1234567890abcdef1234567890abcdef"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
