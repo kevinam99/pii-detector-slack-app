@@ -7,7 +7,7 @@ The PII Detector is an Elixir application that monitors Slack channels and Notio
 ## Features
 
 - **Slack Integration**: Monitors specified Slack channels for messages containing PII
-- **Notion Integration**: Monitors specified Notion databases for tickets containing PII
+- **Notion Integration**: Monitors specified Notion databases for tickets containing PII. Please note that the Notion alerts are instantaneous as Slack becuase Notion takes some time to send the webhook.
 - **PII Detection**: Uses pattern matching and AI (OpenAI) to detect PII in text, images, and PDFs. Added minimum support for multimedia files but the urls received from the webhook for multimedia files don't allow downloading files programmatically to check their contents so cannot check for PII there.
 - **Automatic Content Removal**: Deletes messages/tickets containing PII. However, messages cannot be deleted on Slack via API because the action is not allowed
 - **User Notification**: Sends DMs to users with their original content for easy recreation
@@ -53,7 +53,7 @@ No need to store environment variables for now since everything is hardcoded and
 
 
 ### Deployment
-I deployed this to Gigalix
+I deployed this to Gigalixir because it just makes it very easy and I am used to the platform
 
 ## Testing the Application
 
