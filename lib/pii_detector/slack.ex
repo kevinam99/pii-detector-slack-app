@@ -23,7 +23,7 @@ defmodule PiiDetector.Slack do
           "type" => "section",
           "text" => %{
             "type" => "mrkdwn",
-            "text" => "<#{event["url"]}>."
+            "text" => "Please delete it <#{event["url"]}>."
           }
         },
         %{
