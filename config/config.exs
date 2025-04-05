@@ -49,6 +49,10 @@ config :pii_detector, :notion,
   api_token: "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",
   database_id: "1234567890abcdef1234567890abcdef"
 
+config :pii_detector, notion_module: PiiDetector.Notion
+config :pii_detector, slack_module: PiiDetector.Slack
+config :pii_detector, cloudflare_module: PiiDetector.Cloudlare
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

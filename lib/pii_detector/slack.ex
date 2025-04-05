@@ -46,4 +46,22 @@ defmodule PiiDetector.Slack do
         {:error, "Unknown error"}
     end
   end
+
+  def fetch_file(file_url) do
+    case HTTPoison.get(file_url) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        IO.inspect(body, label: "File content")
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: 302, body: body}} ->
+        IO.inspect(body, label: "File content")
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        {:error, "Error: #{status_code} - #{body}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "Error: #{reason}"}
+    end
+  end
 end

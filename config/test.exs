@@ -12,3 +12,7 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :pii_detector, notion_module: PiiDetector.NotionMock
+config :pii_detector, slack_module: PiiDetector.SlackMock
+config :pii_detector, cloudflare_module: PiiDetector.CloudlareMock
