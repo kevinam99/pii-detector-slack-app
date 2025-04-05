@@ -6,8 +6,8 @@ defmodule PiiDetector.Slack do
 
     message =
       case source do
-        :slack -> "PII detected in your message"
-        :notion -> "PII detected in your Notion ticket"
+        :slack -> "PII detected in your message in ##{event["channel"]}."
+        :notion -> "PII detected in your Notion ticket [#{event["url"]}](#{event["url"]})."
       end
 
     blocks =
@@ -17,6 +17,13 @@ defmodule PiiDetector.Slack do
           "text" => %{
             "type" => "mrkdwn",
             "text" => "*#{message}*"
+          }
+        },
+        %{
+          "type" => "section",
+          "text" => %{
+            "type" => "mrkdwn",
+            "text" => "Please delete it "
           }
         },
         %{

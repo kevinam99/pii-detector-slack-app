@@ -78,7 +78,7 @@ defmodule PiiDetectorWeb.WebhookController do
          {:ok, user_email} <- @notion_module.fetch_user_email(page["created_by"]["id"]),
          {:ok, slack_user} <- @slack_module.lookup_user_by_email(user_email),
          text = build_text_for_notion(page) do
-      handle_text_message(text, %{"user" => slack_user["id"], "text" => text}, :notion)
+      handle_text_message(text, %{"user" => slack_user["id"], "text" => text, "url" => page["url"]}, :notion)
     else
       {:error, reason} ->
         # Handle the error case
