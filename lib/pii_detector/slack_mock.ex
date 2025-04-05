@@ -14,4 +14,8 @@ defmodule PiiDetector.SlackMock do
   def fetch_file(_file_url) do
     {:ok, %{}}
   end
+
+  def fetch_message_permalink(_channel_id, ts) when is_binary(ts) do
+    {:ok, "https://url.com"}
+  end
 end

@@ -4,10 +4,10 @@ defmodule PiiDetector.Slack do
   def send_message("yes", event, source) do
     Logger.info("PII detected in message: #{event["text"]}")
 
-    message =
+    title =
       case source do
-        :slack -> "PII detected in your message in ##{event["channel"]}."
-        :notion -> "PII detected in your Notion ticket [#{event["url"]}](#{event["url"]})."
+        :slack -> "PII detected in your message in your Slack channel"
+        :notion -> "PII detected in your Notion ticket"
       end
 
     blocks =
@@ -16,14 +16,14 @@ defmodule PiiDetector.Slack do
           "type" => "section",
           "text" => %{
             "type" => "mrkdwn",
-            "text" => "*#{message}*"
+            "text" => "*#{title}*"
           }
         },
         %{
           "type" => "section",
           "text" => %{
             "type" => "mrkdwn",
-            "text" => "Please delete it "
+            "text" => "<#{event["url"]}>."
           }
         },
         %{
@@ -69,6 +69,19 @@ defmodule PiiDetector.Slack do
 
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, "Error: #{reason}"}
+    end
+  end
+
+  def fetch_message_permalink(channel_id, ts) when is_binary(ts) do
+    case Slack.Web.Chat.get_permalink(channel_id, ts) do
+      %{"ok" => true, "permalink" => permalink} ->
+        {:ok, permalink}
+
+      {:error, reason} ->
+        {:error, reason}
+
+      _ ->
+        {:error, "No permalink found"}
     end
   end
 end
