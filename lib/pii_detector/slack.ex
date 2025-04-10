@@ -36,6 +36,7 @@ defmodule PiiDetector.Slack do
       ]
       |> Jason.encode!()
 
+    IO.inspect({event["channel"], event["ts"]})
     Slack.Web.Chat.delete(event["channel"], event["ts"]) |> IO.inspect()
     Slack.Web.Chat.post_message(event["user"], "", %{blocks: blocks})
   end
