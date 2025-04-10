@@ -3,8 +3,6 @@ defmodule PiiDetectorWeb.WebhookController do
 
   require Logger
 
-  @slack_app_id Application.compile_env!(:pii_detector, :slack)[:app_id]
-  @slack_verification_token Application.compile_env!(:pii_detector, :slack)[:verification_token]
   @slack_module Application.compile_env!(:pii_detector, :slack_module)
   @notion_module Application.compile_env!(:pii_detector, :notion_module)
   @cloudflare_module Application.compile_env!(:pii_detector, :cloudflare_module)
@@ -17,12 +15,16 @@ defmodule PiiDetectorWeb.WebhookController do
   def slack_webhook(
         conn,
         %{
-          "api_app_id" => @slack_app_id,
-          "token" => @slack_verification_token,
+          "api_app_id" => app_id,
+          "token" => verification_token,
           "event" => %{"blocks" => blocks} = event
-        } = _params
+        } = params
       )
       when is_list(blocks) do
+    slack_config = get_slack_config()
+    ^app_id = slack_config[:app_id]
+    ^verification_token = slack_config[:verification_token]
+
     with nil <- event["bot_id"],
          block when is_map(block) <- List.first(blocks),
          {:rich_text, true} <- {:rich_text, block["type"] == "rich_text"},
@@ -39,6 +41,11 @@ defmodule PiiDetectorWeb.WebhookController do
     else
       _ -> json(conn, %{})
     end
+  rescue
+    e ->
+      IO.inspect(params)
+      Logger.error("Error in slack_webhook: #{inspect(e)}")
+      json(conn, %{})
   end
 
   # handle other message types
@@ -46,13 +53,16 @@ defmodule PiiDetectorWeb.WebhookController do
   def slack_webhook(
         conn,
         %{
-          "api_app_id" => @slack_app_id,
-          "token" => @slack_verification_token,
+          "api_app_id" => app_id,
+          "token" => verification_token,
           "event" => %{"files" => files} = event
         } = params
       )
       when is_list(files) do
     IO.inspect(params, label: "params", limit: :infinity)
+    slack_config = get_slack_config()
+    ^app_id = slack_config[:app_id]
+    ^verification_token = slack_config[:verification_token]
 
     with nil <- event["bot_id"],
          file when is_map(file) <- List.first(files),
@@ -63,6 +73,10 @@ defmodule PiiDetectorWeb.WebhookController do
     else
       _ -> json(conn, %{})
     end
+  rescue
+    e ->
+      Logger.error("Error in slack_webhook: #{inspect(e)}")
+      json(conn, %{})
   end
 
   def slack_webhook(conn, _params), do: json(conn, %{})
@@ -150,5 +164,9 @@ defmodule PiiDetectorWeb.WebhookController do
       acc <> map["plain_text"] <> " "
     end)
     |> String.trim()
+  end
+
+  defp get_slack_config() do
+    Application.fetch_env!(:pii_detector, :slack)
   end
 end

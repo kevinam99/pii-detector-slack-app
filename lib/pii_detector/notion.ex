@@ -1,7 +1,7 @@
 defmodule PiiDetector.Notion do
   def fetch_page(page_id) do
     url = "https://api.notion.com/v1/pages/#{page_id}"
-    api_token = Application.get_env(:pii_detector, :notion)[:api_token]
+    api_token = Application.fetch_env!(:pii_detector, :notion)[:api_token]
 
     headers = [
       {"Authorization", "Bearer #{api_token}"},
@@ -22,7 +22,7 @@ defmodule PiiDetector.Notion do
 
   def fetch_user_email(user_id) do
     url = "https://api.notion.com/v1/users/#{user_id}"
-    api_token = Application.get_env(:pii_detector, :notion)[:api_token]
+    api_token = Application.fetch_env!(:pii_detector, :notion)[:api_token]
 
     headers = [
       {"Authorization", "Bearer #{api_token}"},

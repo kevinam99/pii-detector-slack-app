@@ -31,7 +31,8 @@ defmodule PiiDetectorWeb.WebhookControllerTest do
             }
           ],
           "bot_id" => nil,
-          "text" => "Hello World"
+          "text" => "Hello World",
+          "ts" => "1234567890.123456"
         }
       }
 

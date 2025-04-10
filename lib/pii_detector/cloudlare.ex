@@ -3,7 +3,7 @@ defmodule PiiDetector.Cloudlare do
     url =
       "https://api.cloudflare.com/client/v4/accounts/2532c238321714c590816151bbbb15e5/ai/run/@cf/meta/llama-3-8b-instruct"
 
-    api_token = Application.get_env(:pii_detector, :cloudflare)[:api_token]
+    api_token = Application.fetch_env!(:pii_detector, :cloudflare)[:api_token]
 
     messages =
       [
