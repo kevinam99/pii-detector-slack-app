@@ -29,23 +29,6 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# slack app config
-config :pii_detector, :slack,
-  app_id: "A08M42LM8CR",
-  client_id: "8709482003092.8718088722433",
-  secret: "",
-  signing_secret: "",
-  verification_token: ""
-
-config :slack, api_token: ""
-# cludflare config
-config :pii_detector, :cloudflare,
-  api_token: "",
-  account_id: "2532c238321714c590816151bbbb15e5"
-
-# notion config
-config :pii_detector, :notion, api_token: ""
-
 config :pii_detector, notion_module: PiiDetector.Notion
 config :pii_detector, slack_module: PiiDetector.Slack
 config :pii_detector, cloudflare_module: PiiDetector.Cloudlare

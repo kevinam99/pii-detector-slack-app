@@ -15,6 +15,23 @@ config :pii_detector, PiiDetectorWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "sePe1DDmGszgeujRmK3kk7fwuIyDB/ZIgp5h8Kyk2MjkGePQZeltLojcN9zemNqO"
 
+# slack app config
+config :pii_detector, :slack,
+  app_id: "A08M42LM8CR",
+  client_id: "8709482003092.8718088722433",
+  secret: "",
+  signing_secret: "",
+  verification_token: ""
+
+config :slack, api_token: ""
+# cludflare config
+config :pii_detector, :cloudflare,
+  api_token: "",
+  account_id: "2532c238321714c590816151bbbb15e5"
+
+# notion config
+config :pii_detector, :notion, api_token: ""
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
