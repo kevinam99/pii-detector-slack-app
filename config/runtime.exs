@@ -50,6 +50,23 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  # slack app config
+  config :pii_detector, :slack,
+    app_id: "A08M42LM8CR",
+    client_id: "8709482003092.8718088722433",
+    secret: System.fetch_env!("SLACK_CLIENT_SECRET"),
+    signing_secret: System.fetch_env!("SLACK_SIGNING_SECRET"),
+    verification_token: System.fetch_env!("SLACK_VERIFICATION_TOKEN")
+
+  config :slack, api_token: System.fetch_env!("SLACK_API_TOKEN")
+  # cludflare config
+  config :pii_detector, :cloudflare,
+    api_token: System.fetch_env!("CLOUDFLARE_API_TOKEN"),
+    account_id: System.fetch_env!("CLOUDFLARE_ACCOUNT_ID")
+
+  # notion config
+  config :pii_detector, :notion, api_token: System.fetch_env!("NOTION_API_TOKEN")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

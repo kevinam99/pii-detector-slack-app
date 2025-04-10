@@ -33,21 +33,18 @@ config :phoenix, :json_library, Jason
 config :pii_detector, :slack,
   app_id: "A08M42LM8CR",
   client_id: "8709482003092.8718088722433",
-  secret: "95818df4ebb93cae8085b5191cc94968",
-  signing_secret: "d88373d8a1738e4a7cca43168bc9c6c2",
-  verification_token: "Xxel3XUM6IceouEjkbKjG6mL"
+  secret: "",
+  signing_secret: "",
+  verification_token: ""
 
-config :slack, api_token: "xoxb-8709482003092-8694683744839-ooAxKuzuOlvkiJd5iJPHF5pg"
+config :slack, api_token: ""
 # cludflare config
 config :pii_detector, :cloudflare,
-  api_token: "2GM5GrK_Dpiz7GCELmP6x3tqgpUn03NyCDyt-B-6",
+  api_token: "",
   account_id: "2532c238321714c590816151bbbb15e5"
 
 # notion config
-
-config :pii_detector, :notion,
-  api_token: "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",
-  database_id: "1234567890abcdef1234567890abcdef"
+config :pii_detector, :notion, api_token: ""
 
 config :pii_detector, notion_module: PiiDetector.Notion
 config :pii_detector, slack_module: PiiDetector.Slack
