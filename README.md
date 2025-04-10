@@ -17,13 +17,19 @@ The PII Detector is an Elixir application that monitors Slack channels and Notio
 
 ### Prerequisites
 
-- Elixir 1.12 or higher
-- Erlang/OTP 24 or higher
+- Elixir 1.17.3-otp-27
+- Erlang/OTP 27.1.2
 - Slack workspace with admin privileges
 - Notion workspace with admin privileges
 
 ### Environment variables
-No need to store environment variables for now since everything is hardcoded and the invite to Slack and Notion have been sent to `eng@jumpapp.com`
+ - SLACK_CLIENT_SECRET
+ - SLACK_SIGNING_SECRET
+ - SLACK_VERIFICATION_TOKEN
+ - SLACK_API_TOKEN
+ - NOTION_API_TOKEN
+ - CLOUDFLARE_ACCOUNT_ID
+ - CLOUDFLARE_API_TOKEN
 
 
 ### Slack Setup
