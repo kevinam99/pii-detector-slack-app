@@ -137,6 +137,14 @@ defmodule PiiDetectorWeb.WebhookController do
     {:ok, file_url}
   end
 
+  # handle image files
+  defp handle_file(file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
+    # Handle the file here
+    # For example, you can log it or send it to another service
+    Logger.info("Received file URL: #{file_url}")
+    {:ok, file_url}
+  end
+
   defp build_text_for_notion(page) do
     Enum.reduce(page["properties"]["Ticket description"]["title"], "", fn map, acc ->
       acc <> map["plain_text"] <> " "
