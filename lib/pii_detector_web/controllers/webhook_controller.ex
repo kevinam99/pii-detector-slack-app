@@ -57,7 +57,7 @@ defmodule PiiDetectorWeb.WebhookController do
     with nil <- event["bot_id"],
          file when is_map(file) <- List.first(files),
          {:file, filetype} <- {:file, file["filetype"]},
-         file_url = file["permalink"],
+         file_url = file["url_private_download"],
          handle_file(file_url, filetype, :slack) do
       json(conn, %{})
     else
@@ -140,7 +140,7 @@ defmodule PiiDetectorWeb.WebhookController do
   # handle image files
   defp handle_file(file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
     # Handle the file here
-    # For example, you can log it or send it to another service
+    @slack_module.fetch_file(file_url)
     Logger.info("Received file URL: #{file_url}")
     {:ok, file_url}
   end
