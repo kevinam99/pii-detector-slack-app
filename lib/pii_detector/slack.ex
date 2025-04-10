@@ -56,7 +56,7 @@ defmodule PiiDetector.Slack do
   end
 
   def fetch_file(file_url) do
-    case HTTPoison.get(file_url) do
+    case HTTPoison.get(file_url, follow_redirect: true) |> IO.inspect() do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         IO.inspect(body, label: "File content")
         {:ok, body}
