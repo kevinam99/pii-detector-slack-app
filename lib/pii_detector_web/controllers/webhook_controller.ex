@@ -134,8 +134,8 @@ defmodule PiiDetectorWeb.WebhookController do
   end
 
   defp handle_file(file_url, "pdf", _source) do
-    @slack_module.fetch_file(file_url)
-
+    {:ok, file} = @slack_module.fetch_file(file_url)
+    
     # with {:ok, response} <- @cloudflare_module.check_pii_with_ai(file_url) do
     #   @slack_module.send_message(response, %{"text" => filetype}, source)
     # else
@@ -154,7 +154,7 @@ defmodule PiiDetectorWeb.WebhookController do
   # handle image files
   defp handle_file(file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
     # Handle the file here
-    @slack_module.fetch_file(file_url)
+    {:ok, file} = @slack_module.fetch_file(file_url)
     Logger.info("Received file URL: #{file_url}")
     {:ok, file_url}
   end

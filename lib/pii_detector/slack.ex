@@ -57,7 +57,12 @@ defmodule PiiDetector.Slack do
   end
 
   def fetch_file(file_url) do
-    case HTTPoison.get(file_url, follow_redirect: true) do
+    auth_token = Application.fetch_env!(:pii_detector, :slack)[:user_auth_token]
+
+    headers = [
+      {"Authorization", "Bearer #{auth_token}"}
+    ]
+    case HTTPoison.get(file_url, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         IO.inspect(body, label: "File content")
         {:ok, body}
