@@ -68,7 +68,7 @@ defmodule PiiDetectorWeb.WebhookController do
          file when is_map(file) <- List.first(files),
          {:file, filetype} <- {:file, file["filetype"]},
          file_url = file["url_private_download"],
-         handle_file(file_url, filetype, :slack) do
+         handle_file(event, file_url, filetype, :slack) do
       json(conn, %{})
     else
       _ -> json(conn, %{})
@@ -133,9 +133,8 @@ defmodule PiiDetectorWeb.WebhookController do
     {:ok, text_message}
   end
 
-  defp handle_file(file_url, "pdf", _source) do
+  defp handle_file(event, file_url, "pdf", _source) do
     {:ok, file} = @slack_module.fetch_file(file_url)
-    
     # with {:ok, response} <- @cloudflare_module.check_pii_with_ai(file_url) do
     #   @slack_module.send_message(response, %{"text" => filetype}, source)
     # else
@@ -152,11 +151,17 @@ defmodule PiiDetectorWeb.WebhookController do
   end
 
   # handle image files
-  defp handle_file(file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
+  defp handle_file(event, file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
     # Handle the file here
-    {:ok, file} = @slack_module.fetch_file(file_url)
-    Logger.info("Received file URL: #{file_url}")
-    {:ok, file_url}
+    with {:ok, image} <- @slack_module.fetch_file(file_url),
+         {:ok, response} <- @cloudflare_module.check_pii_with_ai_in_image(image) do
+      @slack_module.send_message(response, event, :slack)
+    else
+      {:error, reason} ->
+        # Handle the error case
+        Logger.info("Error checking PII: #{reason}")
+        {:error, reason}
+    end
   end
 
   defp build_text_for_notion(page) do

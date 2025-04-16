@@ -1,5 +1,5 @@
 defmodule PiiDetector.Cloudlare do
-  def check_pii_with_ai(text_message) do
+  def check_pii_with_ai(text_message) when is_binary(text_message) do
     url =
       "https://api.cloudflare.com/client/v4/accounts/2532c238321714c590816151bbbb15e5/ai/run/@cf/meta/llama-3-8b-instruct"
 
@@ -32,6 +32,37 @@ defmodule PiiDetector.Cloudlare do
 
         # responds with 'yes' or 'no' if the text message contains PII or not
         {:ok, result["response"] |> String.downcase()}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        {:error, "Error: #{status_code} - #{body}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "Error: #{reason}"}
+    end
+  end
+
+  def check_pii_with_ai_in_image(image) when is_list(image) do
+    url =
+      "https://api.cloudflare.com/client/v4/accounts/2532c238321714c590816151bbbb15e5/ai/run/@cf/meta/llama-3-8b-instruct"
+
+    api_token = Application.fetch_env!(:pii_detector, :cloudflare)[:api_token]
+
+    body =
+      %{
+        "image" => image,
+        "prompt" =>
+          "You are a PII detector. You will be given an image. You only have to tell me if the image contains PII or not. You will only respond with 'yes' or 'no'."
+      }
+      |> Jason.encode!()
+
+    headers = [{"Authorization", "Bearer #{api_token}"}, {"Content-Type", "application/json"}]
+
+    case HTTPoison.post(url, body, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        %{"result" => result} = Jason.decode!(body)
+
+        # responds with 'yes' or 'no' if the text message contains PII or not
+        {:ok, result["description"] |> String.downcase()}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
         {:error, "Error: #{status_code} - #{body}"}

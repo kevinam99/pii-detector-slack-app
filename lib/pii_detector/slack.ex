@@ -62,6 +62,7 @@ defmodule PiiDetector.Slack do
     headers = [
       {"Authorization", "Bearer #{auth_token}"}
     ]
+
     case HTTPoison.get(file_url, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         IO.inspect(body, label: "File content")
@@ -100,10 +101,13 @@ defmodule PiiDetector.Slack do
       {"Authorization", "Bearer #{auth_token}"},
       {"Content-Type", "application/json; charset=utf-8"}
     ]
-    body = %{
-      "channel" => channel,
-      "ts" => ts
-    } |> Jason.encode!()
+
+    body =
+      %{
+        "channel" => channel,
+        "ts" => ts
+      }
+      |> Jason.encode!()
 
     case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
