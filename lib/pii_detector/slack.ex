@@ -90,7 +90,7 @@ defmodule PiiDetector.Slack do
 
   defp delete_message(channel, ts) do
     url = "https://slack.com/api/chat.delete"
-    auth_token = Application.fetch_env!(:slack, :user_auth_token)
+    auth_token = Application.fetch_env!(:pii_detector, :slack)[:user_auth_token]
 
     headers = [
       {"Authorization", auth_token},
