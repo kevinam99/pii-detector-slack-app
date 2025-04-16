@@ -41,7 +41,7 @@ defmodule PiiDetector.Cloudlare do
     end
   end
 
-  def check_pii_with_ai_in_image(image) when is_list(image) do
+  def check_pii_with_ai_in_image(image) do
     url =
       "https://api.cloudflare.com/client/v4/accounts/2532c238321714c590816151bbbb15e5/ai/run/@cf/meta/llama-3-8b-instruct"
 
