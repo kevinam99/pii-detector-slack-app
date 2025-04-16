@@ -1,5 +1,4 @@
 defmodule PiiDetector.Slack do
-  alias Hex.HTTP
   require Logger
 
   def send_message("yes", event, source) do
@@ -94,12 +93,13 @@ defmodule PiiDetector.Slack do
 
     headers = [
       {"Authorization", auth_token},
-      {"Content-Type", "application/json"}
+      {"Content-Type", "application/json; charset=utf-8"}
     ]
     body = %{
       "channel" => channel,
       "ts" => ts
     } |> Jason.encode!()
+    IO.inspect({url, body, headers})
 
 
     case HTTPoison.post(url, body, headers) do
