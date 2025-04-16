@@ -56,7 +56,8 @@ if config_env() == :prod do
     client_id: "8709482003092.8718088722433",
     secret: System.fetch_env!("SLACK_CLIENT_SECRET"),
     signing_secret: System.fetch_env!("SLACK_SIGNING_SECRET"),
-    verification_token: System.fetch_env!("SLACK_VERIFICATION_TOKEN")
+    verification_token: System.fetch_env!("SLACK_VERIFICATION_TOKEN"),
+    user_auth_token: System.fetch_env!("SLACK_USER_AUTH_TOKEN")
 
   config :slack, api_token: System.fetch_env!("SLACK_API_TOKEN")
   # cludflare config

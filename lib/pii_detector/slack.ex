@@ -1,4 +1,5 @@
 defmodule PiiDetector.Slack do
+  alias Hex.HTTP
   require Logger
 
   def send_message("yes", event, source) do
@@ -37,7 +38,7 @@ defmodule PiiDetector.Slack do
       |> Jason.encode!()
 
     IO.inspect({event["channel"], event["ts"]})
-    Slack.Web.Chat.delete(event["channel"], event["ts"]) |> IO.inspect()
+    delete_message(event["channel"], event["ts"]) |> IO.inspect()
     Slack.Web.Chat.post_message(event["user"], "", %{blocks: blocks})
   end
 
@@ -84,6 +85,34 @@ defmodule PiiDetector.Slack do
 
       _ ->
         {:error, "No permalink found"}
+    end
+  end
+
+  defp delete_message(channel, ts) do
+    url = "https://slack.com/api/chat.delete"
+    auth_token = Application.fetch_env!(:slack, :user_auth_token)
+
+    headers = [
+      {"Authorization", auth_token},
+      {"Content-Type", "application/json"}
+    ]
+    body = %{
+      "channel" => channel,
+      "ts" => ts
+    } |> Jason.encode!()
+
+
+    case HTTPoison.post(url, body, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        Logger.info("Message deleted successfully")
+        {:ok, body}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.info("Failed to delete message: #{reason}")
+        {:error, reason}
+
+      _ ->
+        {:error, "Unknown error"}
     end
   end
 end
