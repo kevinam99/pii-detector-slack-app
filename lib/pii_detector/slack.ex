@@ -37,7 +37,7 @@ defmodule PiiDetector.Slack do
       |> Jason.encode!()
 
     IO.inspect({event["channel"], event["ts"]})
-    delete_message(event["channel"], event["ts"]) |> IO.inspect()
+    delete_message(event["channel"], event["ts"])
     Slack.Web.Chat.post_message(event["user"], "", %{blocks: blocks})
   end
 
@@ -99,8 +99,6 @@ defmodule PiiDetector.Slack do
       "channel" => channel,
       "ts" => ts
     } |> Jason.encode!()
-    IO.inspect({url, body, headers})
-
 
     case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
