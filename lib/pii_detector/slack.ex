@@ -92,7 +92,7 @@ defmodule PiiDetector.Slack do
     auth_token = Application.fetch_env!(:pii_detector, :slack)[:user_auth_token]
 
     headers = [
-      {"Authorization", auth_token},
+      {"Authorization", "Bearer #{auth_token}"},
       {"Content-Type", "application/json; charset=utf-8"}
     ]
     body = %{
