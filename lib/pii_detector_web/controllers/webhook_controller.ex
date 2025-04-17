@@ -153,9 +153,9 @@ defmodule PiiDetectorWeb.WebhookController do
   # handle image files
   defp handle_file(event, file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
     # Handle the file here
+
     with {:ok, image} <- @slack_module.fetch_file(file_url),
-         {:ok, text} <- @cloudflare_module.extract_text_from_image(image),
-         {:ok, response} <- @cloudflare_module.check_pii_with_ai(text) do
+         {:ok, response} <- PiiDetector.Huggingface.check_pii_with_ai_in_image(image) do
       @slack_module.send_message(response, event, :slack)
     else
       {:error, reason} ->
