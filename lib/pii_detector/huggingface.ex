@@ -1,5 +1,7 @@
 defmodule PiiDetector.Huggingface do
+  require Logger
   def check_pii_with_ai_in_image(image) do
+    Logger.info("Calling Huggingface API to check PII in image")
     api_key = Application.fetch_env!(:pii_detector, :huggingface_api_key)
     url = "https://router.huggingface.co/nebius/v1/chat/completions"
     headers = [{"Authorization", "Bearer #{api_key}"}, {"Content-Type", "application/json"}]
@@ -25,6 +27,7 @@ defmodule PiiDetector.Huggingface do
     case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         body = Jason.decode!(body)
+        Logger.info("Response from Huggingface: #{inspect(body)}")
 
         response =
           Map.get(body, "choices")
