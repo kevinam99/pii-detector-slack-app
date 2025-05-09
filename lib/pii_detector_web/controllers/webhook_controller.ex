@@ -133,7 +133,6 @@ defmodule PiiDetectorWeb.WebhookController do
   end
 
   defp handle_file(event, file_url, file_params, _source) do
-    {:ok, file} = @slack_module.fetch_file(file_url)
     mimetype = file_params["mimetype"]
 
     with {:ok, file} <- @slack_module.fetch_file(file_url),
