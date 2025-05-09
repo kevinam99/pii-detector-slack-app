@@ -35,6 +35,7 @@ config :pii_detector, :notion, api_token: ""
 # google ai config
 
 config :pii_detector, google_ai_api_key: ""
+config :pii_detector, google_ai_model: "gemini-2.0-flash"
 
 # ## SSL Support
 #

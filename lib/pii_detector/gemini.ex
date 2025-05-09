@@ -52,7 +52,8 @@ defmodule PiiDetector.Gemini do
 
   defp fetch_google_url() do
     api_key = Application.fetch_env!(:pii_detector, :google_ai_api_key)
+    model = Application.fetch_env!(:pii_detector, :google_ai_model)
 
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=#{api_key}"
+    "https://generativelanguage.googleapis.com/v1beta/models/#{model}:generateContent?key=#{api_key}"
   end
 end

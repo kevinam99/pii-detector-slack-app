@@ -71,6 +71,7 @@ if config_env() == :prod do
   config :pii_detector, :huggingface_api_key, System.fetch_env!("HUGGINGFACE_API_KEY")
 
   config :pii_detector, google_ai_api_key: System.fetch_env!("GOOGLE_AI_API_KEY")
+  config :pii_detector, google_ai_model: System.get_env("GOOGLE_AI_MODEL") || "gemini-2.0-flash"
 
   # ## SSL Support
   #
