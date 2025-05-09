@@ -85,13 +85,12 @@ defmodule PiiDetectorWeb.WebhookController do
     json(conn, %{challenge: "challenge"})
   end
 
+  # Handle the Notion webhook event here
   def notion_webhook(conn, %{"type" => "page.created"} = params) do
-    # Handle the Notion webhook event here
-    IO.inspect(params, label: "Notion webhook params", limit: :infinity)
-
     with {:ok, page} <- @notion_module.fetch_page(params["entity"]["id"]),
          {:ok, user_email} <- @notion_module.fetch_user_email(page["created_by"]["id"]),
          {:ok, slack_user} <- @slack_module.lookup_user_by_email(user_email),
+         _ <- handle_file_for_notion(page),
          text = build_text_for_notion(page) do
       handle_text_message(
         text,
@@ -172,6 +171,16 @@ defmodule PiiDetectorWeb.WebhookController do
 
     Logger.info("Received file URL: #{file_url}")
     {:ok, file_url}
+  end
+
+  defp handle_file_for_notion(page) do
+    with {:ok, page_content} when not is_nil(page_content) <-
+           @notion_module.fetch_page_content(page["id"]),
+         {:ok, file_url} <- @notion_module.fetch_file_url_from_page_content(page_content),
+         {:ok, file, mime_type} <- @notion_module.fetch_file_and_content_type(file_url),
+         {:ok, response} <- @gemini_module.check_pii_in_file(file, mimetype) do
+      @slack_module.send_message(response, event, :notion)
+    end
   end
 
   defp build_text_for_notion(page) do
