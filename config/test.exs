@@ -16,3 +16,5 @@ config :phoenix, :plug_init_mode, :runtime
 config :pii_detector, notion_module: PiiDetector.NotionMock
 config :pii_detector, slack_module: PiiDetector.SlackMock
 config :pii_detector, cloudflare_module: PiiDetector.CloudlareMock
+config :pii_detector, gemini_module: PiiDetector.GeminiMock
+config :pii_detector, :slack, app_id: "1234", verification_token: "5678"

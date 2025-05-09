@@ -32,6 +32,7 @@ config :phoenix, :json_library, Jason
 config :pii_detector, notion_module: PiiDetector.Notion
 config :pii_detector, slack_module: PiiDetector.Slack
 config :pii_detector, cloudflare_module: PiiDetector.Cloudlare
+config :pii_detector, gemini_module: PiiDetector.Gemini
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

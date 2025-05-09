@@ -6,6 +6,7 @@ defmodule PiiDetectorWeb.WebhookController do
   @slack_module Application.compile_env!(:pii_detector, :slack_module)
   @notion_module Application.compile_env!(:pii_detector, :notion_module)
   @cloudflare_module Application.compile_env!(:pii_detector, :cloudflare_module)
+  @gemini_module Application.compile_env!(:pii_detector, :gemini_module)
 
   def slack_webhook(conn, %{"challenge" => challenge}) do
     json(conn, %{challenge: challenge})
@@ -48,8 +49,6 @@ defmodule PiiDetectorWeb.WebhookController do
       json(conn, %{})
   end
 
-  # handle other message types
-  # Problem: the urls received from the webhook for multimedia files don't allow downloading files programmatically to check their contents
   def slack_webhook(
         conn,
         %{
@@ -137,7 +136,7 @@ defmodule PiiDetectorWeb.WebhookController do
     mimetype = file_params["mimetype"]
 
     with {:ok, file} <- @slack_module.fetch_file(file_url),
-         {:ok, response} <- PiiDetector.Gemini.check_pii_in_file(file, mimetype) do
+         {:ok, response} <- @gemini_module.check_pii_in_file(file, mimetype) do
       @slack_module.send_message(response, event, :slack)
     else
       {:error, reason} ->

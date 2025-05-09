@@ -41,6 +41,31 @@ defmodule PiiDetectorWeb.WebhookControllerTest do
     end
   end
 
+  test "returns 200 for messages with files", %{conn: conn} do
+    params = %{
+      "api_app_id" => Application.get_env(:pii_detector, :slack)[:app_id],
+      "token" => Application.get_env(:pii_detector, :slack)[:verification_token],
+      "event" => %{
+        "channel" => "C08LVA8",
+        "files" => [
+          %{
+            "filetype" => "pdf",
+            "id" => "F08RJ2173C5",
+            "mimetype" => "application/pdf",
+            "url_private_download" => "https://files.slack.com/file2_.pdf"
+          }
+        ],
+        "ts" => "1746763397.418489",
+        "user" => "U08LVE609QC"
+      },
+      "event_context" => "4NWQTgifQ",
+      "event_id" => "Ev08RY6N"
+    }
+
+    conn = post(conn, "/api/slack-webhook", params)
+    assert json_response(conn, 200) == %{}
+  end
+
   describe "notion webhooks" do
     test "returns 200 for valid challenge", %{conn: conn} do
       params = %{"verification_token" => "test_token"}
