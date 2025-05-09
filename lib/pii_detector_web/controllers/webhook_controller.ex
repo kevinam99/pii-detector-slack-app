@@ -67,7 +67,8 @@ defmodule PiiDetectorWeb.WebhookController do
     with nil <- event["bot_id"],
          file_params when is_map(file_params) <- List.first(files),
          file_url = file_params["url_private_download"],
-         handle_file(event, file_url, file_params, :slack) do
+         {:ok, permalink} <- @slack_module.fetch_message_permalink(event["channel"], event["ts"]),
+         handle_file(Map.put(event, "url", permalink), file_url, file_params, :slack) do
       json(conn, %{})
     else
       _ -> json(conn, %{})

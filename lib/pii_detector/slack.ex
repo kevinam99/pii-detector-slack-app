@@ -30,7 +30,7 @@ defmodule PiiDetector.Slack do
           "type" => "section",
           "text" => %{
             "type" => "mrkdwn",
-            "text" => "```#{event["text"]}```"
+            "text" => "```#{event["text"] || ""}```"
           }
         }
       ]
