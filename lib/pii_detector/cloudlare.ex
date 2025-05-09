@@ -1,5 +1,5 @@
 defmodule PiiDetector.Cloudlare do
-  def check_pii_with_ai(text_message) do
+  def check_pii_with_ai(text_message) when is_binary(text_message) do
     url =
       "https://api.cloudflare.com/client/v4/accounts/2532c238321714c590816151bbbb15e5/ai/run/@cf/meta/llama-3-8b-instruct"
 

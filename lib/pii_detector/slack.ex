@@ -2,7 +2,7 @@ defmodule PiiDetector.Slack do
   require Logger
 
   def send_message("yes", event, source) do
-    Logger.info("PII detected in message: #{event["text"]}")
+    # Logger.info("PII detected in message")
 
     title =
       case source do
@@ -23,14 +23,14 @@ defmodule PiiDetector.Slack do
           "type" => "section",
           "text" => %{
             "type" => "mrkdwn",
-            "text" => "Please delete it <#{event["url"]}>."
+            "text" => "Your message was deleted automatically <#{event["url"]}>."
           }
         },
         %{
           "type" => "section",
           "text" => %{
             "type" => "mrkdwn",
-            "text" => "```#{event["text"]}```"
+            "text" => "```#{event["text"] || ""}```"
           }
         }
       ]
@@ -57,7 +57,13 @@ defmodule PiiDetector.Slack do
   end
 
   def fetch_file(file_url) do
-    case HTTPoison.get(file_url, follow_redirect: true) do
+    auth_token = Application.fetch_env!(:pii_detector, :slack)[:user_auth_token]
+
+    headers = [
+      {"Authorization", "Bearer #{auth_token}"}
+    ]
+
+    case HTTPoison.get(file_url, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         IO.inspect(body, label: "File content")
         {:ok, body}
@@ -95,10 +101,13 @@ defmodule PiiDetector.Slack do
       {"Authorization", "Bearer #{auth_token}"},
       {"Content-Type", "application/json; charset=utf-8"}
     ]
-    body = %{
-      "channel" => channel,
-      "ts" => ts
-    } |> Jason.encode!()
+
+    body =
+      %{
+        "channel" => channel,
+        "ts" => ts
+      }
+      |> Jason.encode!()
 
     case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->

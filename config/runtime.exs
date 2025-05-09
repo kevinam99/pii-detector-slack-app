@@ -68,6 +68,10 @@ if config_env() == :prod do
   # notion config
   config :pii_detector, :notion, api_token: System.fetch_env!("NOTION_API_TOKEN")
 
+  config :pii_detector, :huggingface_api_key, System.fetch_env!("HUGGINGFACE_API_KEY")
+
+  config :pii_detector, google_ai_api_key: System.fetch_env!("GOOGLE_AI_API_KEY")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

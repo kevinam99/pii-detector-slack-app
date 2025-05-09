@@ -65,10 +65,10 @@ defmodule PiiDetectorWeb.WebhookController do
     ^verification_token = slack_config[:verification_token]
 
     with nil <- event["bot_id"],
-         file when is_map(file) <- List.first(files),
-         {:file, filetype} <- {:file, file["filetype"]},
-         file_url = file["url_private_download"],
-         handle_file(file_url, filetype, :slack) do
+         file_params when is_map(file_params) <- List.first(files),
+         file_url = file_params["url_private_download"],
+         {:ok, permalink} <- @slack_module.fetch_message_permalink(event["channel"], event["ts"]),
+         handle_file(Map.put(event, "url", permalink), file_url, file_params, :slack) do
       json(conn, %{})
     else
       _ -> json(conn, %{})
@@ -133,28 +133,19 @@ defmodule PiiDetectorWeb.WebhookController do
     {:ok, text_message}
   end
 
-  defp handle_file(file_url, "pdf", _source) do
-    @slack_module.fetch_file(file_url)
+  defp handle_file(event, file_url, file_params, _source) do
+    mimetype = file_params["mimetype"]
 
-    # with {:ok, response} <- @cloudflare_module.check_pii_with_ai(file_url) do
-    #   @slack_module.send_message(response, %{"text" => filetype}, source)
-    # else
-    #   {:error, reason} ->
-    #     # Handle the error case
-    #     Logger.info("Error checking PII: #{reason}")
-    #     {:error, reason}
-    # end
+    with {:ok, file} <- @slack_module.fetch_file(file_url),
+         {:ok, response} <- PiiDetector.Gemini.check_pii_in_file(file, mimetype) do
+      @slack_module.send_message(response, event, :slack)
+    else
+      {:error, reason} ->
+        # Handle the error case
+        Logger.info("Error checking PII: #{reason}")
+        {:error, reason}
+    end
 
-    # Handle the file here
-    # For example, you can log it or send it to another service
-    Logger.info("Received file URL: #{file_url}")
-    {:ok, file_url}
-  end
-
-  # handle image files
-  defp handle_file(file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
-    # Handle the file here
-    @slack_module.fetch_file(file_url)
     Logger.info("Received file URL: #{file_url}")
     {:ok, file_url}
   end

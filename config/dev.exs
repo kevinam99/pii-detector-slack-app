@@ -32,6 +32,10 @@ config :pii_detector, :cloudflare,
 # notion config
 config :pii_detector, :notion, api_token: ""
 
+# google ai config
+
+config :pii_detector, google_ai_api_key: ""
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
