@@ -173,8 +173,8 @@ defmodule PiiDetectorWeb.WebhookController do
   defp handle_file_for_notion(page, event) do
     with {:ok, page_content} when not is_nil(page_content) <-
            @notion_module.fetch_page_content(page["id"]),
-           IO.inspect(page_content),
-         {:ok, file_url} when not is_nil(file_url) <- @notion_module.fetch_file_url_from_page_content(page_content),
+         {:ok, file_url} when not is_nil(file_url) <-
+           @notion_module.fetch_file_url_from_page_content(page_content),
          {:ok, file, mime_type} <- @notion_module.fetch_file_and_content_type(file_url),
          {:ok, response} <- @gemini_module.check_pii_in_file(file, mime_type) do
       @slack_module.send_message(response, event, :notion)
