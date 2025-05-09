@@ -27,11 +27,19 @@ defmodule PiiDetector.Gemini do
       }
     ]
 
-    body = Jason.encode!(contents)
+    body = %{contents: contents} |> Jason.encode!()
 
     case HTTPoison.post(url, body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        response = String.downcase(body) |> String.trim() |> String.replace(".", "")
+        [%{"finishReason" => "STOP", "content" => %{"parts" => parts}}] =
+          Jason.decode!(body)["candidates"]
+
+        response =
+          Enum.at(parts, 0)["text"]
+          |> String.downcase()
+          |> String.trim()
+          |> String.replace(".", "")
+
         {:ok, response}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
