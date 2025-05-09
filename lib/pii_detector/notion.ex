@@ -1,4 +1,6 @@
 defmodule PiiDetector.Notion do
+  require Logger
+
   def fetch_page(page_id) do
     url = "https://api.notion.com/v1/pages/#{page_id}"
     api_token = Application.fetch_env!(:pii_detector, :notion)[:api_token]
@@ -33,6 +35,28 @@ defmodule PiiDetector.Notion do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         %{"object" => "user"} = user = Jason.decode!(body)
         {:ok, user["person"]["email"]}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        {:error, "Error: #{status_code} - #{body}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "Error: #{reason}"}
+    end
+  end
+
+  def delete_page(page_id) do
+    url = "https://api.notion.com/v1/blocks/#{page_id}/"
+    api_token = Application.fetch_env!(:pii_detector, :notion)[:api_token]
+
+    headers = [
+      {"Authorization", "Bearer #{api_token}"},
+      {"Notion-Version", "2022-06-28"}
+    ]
+
+    case HTTPoison.delete(url, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        Logger.info("Deleted Notion page with id #{page_id}")
+        {:ok, Jason.decode!(body)}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
         {:error, "Error: #{status_code} - #{body}"}

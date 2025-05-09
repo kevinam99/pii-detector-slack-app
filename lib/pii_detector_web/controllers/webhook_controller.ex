@@ -87,6 +87,7 @@ defmodule PiiDetectorWeb.WebhookController do
 
   def notion_webhook(conn, %{"type" => "page.created"} = params) do
     # Handle the Notion webhook event here
+    IO.inspect(params, label: "Notion webhook params", limit: :infinity)
 
     with {:ok, page} <- @notion_module.fetch_page(params["entity"]["id"]),
          {:ok, user_email} <- @notion_module.fetch_user_email(page["created_by"]["id"]),
@@ -94,7 +95,12 @@ defmodule PiiDetectorWeb.WebhookController do
          text = build_text_for_notion(page) do
       handle_text_message(
         text,
-        %{"user" => slack_user["id"], "text" => text, "url" => page["url"]},
+        %{
+          "user" => slack_user["id"],
+          "text" => text,
+          "url" => page["url"],
+          "page_id" => page["id"]
+        },
         :notion
       )
     else
@@ -112,6 +118,25 @@ defmodule PiiDetectorWeb.WebhookController do
   defp handle_text_message(nil, _event, _) do
     # Handle the case where there is no text message
     nil
+  end
+
+  defp handle_text_message(text_message, event, :notion) when is_binary(text_message) do
+    text_message = String.trim(text_message)
+
+    with {:ok, response} <- @cloudflare_module.check_pii_with_ai(text_message),
+         _ <- @notion_module.delete_page(event["page_id"]) do
+      @slack_module.send_message(response, event, :notion)
+    else
+      {:error, reason} ->
+        # Handle the error case
+        Logger.info("Error checking PII: #{reason}")
+        {:error, reason}
+    end
+
+    # Handle the text message here
+    # For example, you can log it or send it to another service
+    Logger.info("Received text message: #{text_message}")
+    {:ok, text_message}
   end
 
   defp handle_text_message(text_message, event, source) when is_binary(text_message) do
