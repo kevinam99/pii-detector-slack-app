@@ -65,9 +65,9 @@ defmodule PiiDetectorWeb.WebhookController do
     ^verification_token = slack_config[:verification_token]
 
     with nil <- event["bot_id"],
-         file when is_map(file) <- List.first(files),
+         file_params when is_map(file_params) <- List.first(files),
          file_url = file["url_private_download"],
-         handle_file(event, file_url, files, :slack) do
+         handle_file(event, file_url, file_params, :slack) do
       json(conn, %{})
     else
       _ -> json(conn, %{})

@@ -4,7 +4,7 @@ defmodule PiiDetector.Gemini do
   """
 
   def check_pii_in_file(file, mime_type) do
-    [api_key: api_key, url: url] = fetch_google_config()
+    url = fetch_google_url()
 
     headers = [
       {"Content-Type", "application/json"}
@@ -42,12 +42,9 @@ defmodule PiiDetector.Gemini do
     end
   end
 
-  defp fetch_google_config() do
+  defp fetch_google_url() do
     api_key = Application.fetch_env!(:pii_detector, :google_ai_api_key)
 
-    url =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=#{api_key}"
-
-    [api_key: api_key, url: url]
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=#{api_key}"
   end
 end
