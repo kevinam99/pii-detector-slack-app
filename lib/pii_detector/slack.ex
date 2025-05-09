@@ -2,7 +2,7 @@ defmodule PiiDetector.Slack do
   require Logger
 
   def send_message("yes", event, source) do
-    Logger.info("PII detected in message: #{event["text"]}")
+    # Logger.info("PII detected in message")
 
     title =
       case source do

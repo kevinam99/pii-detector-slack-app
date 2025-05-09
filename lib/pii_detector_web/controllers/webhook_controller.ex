@@ -66,9 +66,8 @@ defmodule PiiDetectorWeb.WebhookController do
 
     with nil <- event["bot_id"],
          file when is_map(file) <- List.first(files),
-         {:file, filetype} <- {:file, file["filetype"]},
          file_url = file["url_private_download"],
-         handle_file(event, file_url, filetype, :slack) do
+         handle_file(event, file_url, files, :slack) do
       json(conn, %{})
     else
       _ -> json(conn, %{})
@@ -133,29 +132,12 @@ defmodule PiiDetectorWeb.WebhookController do
     {:ok, text_message}
   end
 
-  defp handle_file(event, file_url, "pdf", _source) do
+  defp handle_file(event, file_url, file_params, _source) do
     {:ok, file} = @slack_module.fetch_file(file_url)
-    # with {:ok, response} <- @cloudflare_module.check_pii_with_ai(file_url) do
-    #   @slack_module.send_message(response, %{"text" => filetype}, source)
-    # else
-    #   {:error, reason} ->
-    #     # Handle the error case
-    #     Logger.info("Error checking PII: #{reason}")
-    #     {:error, reason}
-    # end
+    mimetype = file_params["mimetype"]
 
-    # Handle the file here
-    # For example, you can log it or send it to another service
-    Logger.info("Received file URL: #{file_url}")
-    {:ok, file_url}
-  end
-
-  # handle image files
-  defp handle_file(event, file_url, filetype, _source) when filetype in ["jpg", "jpeg", "png"] do
-    # Handle the file here
-
-    with {:ok, image} <- @slack_module.fetch_file(file_url),
-         {:ok, response} <- PiiDetector.Huggingface.check_pii_with_ai_in_image(image) do
+    with {:ok, file} <- @slack_module.fetch_file(file_url),
+         {:ok, response} <- PiiDetector.Gemini.check_pii_in_file(file, mimetype) do
       @slack_module.send_message(response, event, :slack)
     else
       {:error, reason} ->
@@ -163,6 +145,9 @@ defmodule PiiDetectorWeb.WebhookController do
         Logger.info("Error checking PII: #{reason}")
         {:error, reason}
     end
+
+    Logger.info("Received file URL: #{file_url}")
+    {:ok, file_url}
   end
 
   defp build_text_for_notion(page) do
