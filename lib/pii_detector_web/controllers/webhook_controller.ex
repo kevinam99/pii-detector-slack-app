@@ -90,18 +90,15 @@ defmodule PiiDetectorWeb.WebhookController do
     with {:ok, page} <- @notion_module.fetch_page(params["entity"]["id"]),
          {:ok, user_email} <- @notion_module.fetch_user_email(page["created_by"]["id"]),
          {:ok, slack_user} <- @slack_module.lookup_user_by_email(user_email),
-         _ <- handle_file_for_notion(page),
-         text = build_text_for_notion(page) do
-      handle_text_message(
-        text,
-        %{
-          "user" => slack_user["id"],
-          "text" => text,
-          "url" => page["url"],
-          "page_id" => page["id"]
-        },
-        :notion
-      )
+         text = build_text_for_notion(page),
+         event = %{
+           "user" => slack_user["id"],
+           "text" => text,
+           "url" => page["url"],
+           "page_id" => page["id"]
+         } do
+      handle_file_for_notion(page, event)
+      handle_text_message(text, event, :notion)
     else
       {:error, reason} ->
         # Handle the error case
@@ -173,7 +170,7 @@ defmodule PiiDetectorWeb.WebhookController do
     {:ok, file_url}
   end
 
-  defp handle_file_for_notion(page) do
+  defp handle_file_for_notion(page, event) do
     with {:ok, page_content} when not is_nil(page_content) <-
            @notion_module.fetch_page_content(page["id"]),
          {:ok, file_url} <- @notion_module.fetch_file_url_from_page_content(page_content),
