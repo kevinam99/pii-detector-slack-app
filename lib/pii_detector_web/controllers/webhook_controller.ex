@@ -178,7 +178,7 @@ defmodule PiiDetectorWeb.WebhookController do
            @notion_module.fetch_page_content(page["id"]),
          {:ok, file_url} <- @notion_module.fetch_file_url_from_page_content(page_content),
          {:ok, file, mime_type} <- @notion_module.fetch_file_and_content_type(file_url),
-         {:ok, response} <- @gemini_module.check_pii_in_file(file, mimetype) do
+         {:ok, response} <- @gemini_module.check_pii_in_file(file, mime_type) do
       @slack_module.send_message(response, event, :notion)
     end
   end
