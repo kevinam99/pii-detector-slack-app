@@ -85,18 +85,20 @@ defmodule PiiDetectorWeb.WebhookController do
     json(conn, %{challenge: "challenge"})
   end
 
+  # Handle the Notion webhook event here
   def notion_webhook(conn, %{"type" => "page.created"} = params) do
-    # Handle the Notion webhook event here
-
     with {:ok, page} <- @notion_module.fetch_page(params["entity"]["id"]),
          {:ok, user_email} <- @notion_module.fetch_user_email(page["created_by"]["id"]),
          {:ok, slack_user} <- @slack_module.lookup_user_by_email(user_email),
-         text = build_text_for_notion(page) do
-      handle_text_message(
-        text,
-        %{"user" => slack_user["id"], "text" => text, "url" => page["url"]},
-        :notion
-      )
+         text = build_text_for_notion(page),
+         event = %{
+           "user" => slack_user["id"],
+           "text" => text,
+           "url" => page["url"],
+           "page_id" => page["id"]
+         } do
+      handle_file_for_notion(page, event)
+      handle_text_message(text, event, :notion)
     else
       {:error, reason} ->
         # Handle the error case
@@ -112,6 +114,25 @@ defmodule PiiDetectorWeb.WebhookController do
   defp handle_text_message(nil, _event, _) do
     # Handle the case where there is no text message
     nil
+  end
+
+  defp handle_text_message(text_message, event, :notion) when is_binary(text_message) do
+    text_message = String.trim(text_message)
+
+    with {:ok, response} <- @cloudflare_module.check_pii_with_ai(text_message),
+         _ <- @notion_module.delete_page(event["page_id"]) do
+      @slack_module.send_message(response, event, :notion)
+    else
+      {:error, reason} ->
+        # Handle the error case
+        Logger.info("Error checking PII: #{reason}")
+        {:error, reason}
+    end
+
+    # Handle the text message here
+    # For example, you can log it or send it to another service
+    Logger.info("Received text message: #{text_message}")
+    {:ok, text_message}
   end
 
   defp handle_text_message(text_message, event, source) when is_binary(text_message) do
@@ -147,6 +168,19 @@ defmodule PiiDetectorWeb.WebhookController do
 
     Logger.info("Received file URL: #{file_url}")
     {:ok, file_url}
+  end
+
+  defp handle_file_for_notion(page, event) do
+    with {:ok, page_content} when not is_nil(page_content) <-
+           @notion_module.fetch_page_content(page["id"]),
+         {:ok, file_url} when not is_nil(file_url) <-
+           @notion_module.fetch_file_url_from_page_content(page_content),
+         {:ok, file, mime_type} <- @notion_module.fetch_file_and_content_type(file_url),
+         {:ok, response} <- @gemini_module.check_pii_in_file(file, mime_type) do
+      @slack_module.send_message(response, event, :notion)
+    else
+      error -> {:ok, error}
+    end
   end
 
   defp build_text_for_notion(page) do

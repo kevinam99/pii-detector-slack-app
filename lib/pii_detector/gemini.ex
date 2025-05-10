@@ -2,6 +2,7 @@ defmodule PiiDetector.Gemini do
   @moduledoc """
   A module for interacting with the Gemini API.
   """
+  def check_pii_in_file(nil, _mime_type), do: {:ok, "no_pii"}
 
   def check_pii_in_file(file, mime_type) do
     url = fetch_google_url()
